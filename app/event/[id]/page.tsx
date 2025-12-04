@@ -19,11 +19,17 @@ export default async function EventPage({ params }: Props) {
     (event.metrics.revenueCurrent / event.metrics.revenueGoal) * 100
   );
 
+  const COLORS = ["#0A484D", "#166e82", "#e3974f", "#2c3e50", "#987284"];
+
+  const PRIMARY_COLOR = COLORS[1];
+  const SECONDARY_COLOR = COLORS[2];
+  const ACCENT_COLOR = COLORS[2];
+
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
       <div className="p-4 space-y-6">
         {/* Header with Back Button */}
-        <div className="space-y-2">
+        <div className="space-y-2 md:hidden">
           <Link
             href="/"
             className="inline-flex items-center text-gray-600 mb-4 gap-2"
@@ -42,7 +48,7 @@ export default async function EventPage({ params }: Props) {
                 d="M10 19l-7-7m0 0l7-7m-7 7h18"
               />
             </svg>
-            <span className="text-sm font-medium">Voltar</span>
+            <span className="text-sm font-medium">Meus Eventos</span>
           </Link>
           <h1 className="text-lg font-bold text-gray-900">{event.title}</h1>
           <p className="text-sm text-gray-500">
@@ -54,7 +60,7 @@ export default async function EventPage({ params }: Props) {
         <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
           <div className="flex justify-between items-start mb-4">
             <div className="flex items-center gap-2">
-              <div className="text-blue-500">
+              <div style={{ color: PRIMARY_COLOR }}>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-6 w-6"
@@ -90,13 +96,18 @@ export default async function EventPage({ params }: Props) {
                 minimumFractionDigits: 2,
               })}
             </span>
-            <span className="text-blue-600 font-bold">{percentage}%</span>
+            <span className="font-bold" style={{ color: PRIMARY_COLOR }}>
+              {percentage}%
+            </span>
           </div>
 
           <div className="w-full bg-gray-100 rounded-full h-2">
             <div
-              className="bg-blue-600 h-2 rounded-full"
-              style={{ width: `${Math.min(percentage, 100)}%` }}
+              className="h-2 rounded-full"
+              style={{
+                width: `${Math.min(percentage, 100)}%`,
+                backgroundColor: PRIMARY_COLOR,
+              }}
             ></div>
           </div>
         </div>
@@ -114,7 +125,10 @@ export default async function EventPage({ params }: Props) {
 
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                  <div
+                    className="w-3 h-3 rounded-full"
+                    style={{ backgroundColor: PRIMARY_COLOR }}
+                  ></div>
                   <span className="text-sm text-gray-600">Pagantes</span>
                   <span className="text-sm font-semibold text-gray-900 ml-auto mr-8">
                     {(
@@ -123,7 +137,10 @@ export default async function EventPage({ params }: Props) {
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-orange-500"></div>
+                  <div
+                    className="w-3 h-3 rounded-full"
+                    style={{ backgroundColor: SECONDARY_COLOR }}
+                  ></div>
                   <span className="text-sm text-gray-600">Cortesias</span>
                   <span className="text-sm font-semibold text-gray-900 ml-auto mr-8">
                     {event.metrics.cortesias.toLocaleString("pt-BR")}
@@ -150,7 +167,7 @@ export default async function EventPage({ params }: Props) {
                   cy="50"
                   r="40"
                   fill="none"
-                  stroke="#3b82f6"
+                  stroke={PRIMARY_COLOR}
                   strokeWidth="8"
                   strokeDasharray={`${
                     ((event.ticketsSold - event.metrics.cortesias) /
@@ -165,7 +182,7 @@ export default async function EventPage({ params }: Props) {
                   cy="50"
                   r="40"
                   fill="none"
-                  stroke="#f97316"
+                  stroke={SECONDARY_COLOR}
                   strokeWidth="8"
                   strokeDasharray={`${
                     (event.metrics.cortesias / event.ticketsSold) * 251.2
@@ -207,12 +224,13 @@ export default async function EventPage({ params }: Props) {
                   </div>
                   <div className="w-full bg-gray-100 rounded-full h-1.5">
                     <div
-                      className="bg-green-500 h-1.5 rounded-full"
+                      className="h-1.5 rounded-full"
                       style={{
                         width: `${Math.min(
                           (sector.sold / sector.total) * 100,
                           100
                         )}%`,
+                        backgroundColor: ACCENT_COLOR,
                       }}
                     ></div>
                   </div>
@@ -245,8 +263,11 @@ export default async function EventPage({ params }: Props) {
                     </div>
                     <div className="w-full bg-gray-100 rounded-full h-1.5">
                       <div
-                        className="bg-blue-600 h-1.5 rounded-full"
-                        style={{ width: `${Math.min(percentage, 100)}%` }}
+                        className="h-1.5 rounded-full"
+                        style={{
+                          width: `${Math.min(percentage, 100)}%`,
+                          backgroundColor: PRIMARY_COLOR,
+                        }}
                       ></div>
                     </div>
                   </div>

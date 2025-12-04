@@ -16,17 +16,17 @@ export default function BottomNav() {
     return false;
   };
 
-  const itensGeral = [
+  const itemsGeral = [
     {
       id: "dashboard" as const,
-      label: "Dashboard",
+      label: "Eventos",
       icon: LayoutDashboard,
       url: "/",
     },
     { id: "perfil" as const, label: "Perfil", icon: User, url: "/perfil" },
   ];
 
-  const itensEvento = [
+  const itemsEvento = [
     {
       id: "dashboard" as const,
       label: "Dashboard",
@@ -48,13 +48,13 @@ export default function BottomNav() {
   ];
 
   const isEventPage = pathname.startsWith("/event/");
-  const itens = isEventPage ? itensEvento : itensGeral;
+  const items = isEventPage ? itemsEvento : itemsGeral;
 
   return (
     <nav className="block md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg pb-safe z-50">
       <div className="max-w-md mx-auto">
         <div className="flex items-center">
-          {itens.map((item) => {
+          {items.map((item) => {
             const Icon = item.icon;
 
             return (
@@ -65,7 +65,7 @@ export default function BottomNav() {
                 }}
                 className={`flex-1 flex flex-col items-center py-2 px-3 transition-colors ${
                   isActive(item.id)
-                    ? "text-[#0D5C63]"
+                    ? "text-[#0A484D]"
                     : "text-gray-500 hover:text-gray-700"
                 }`}
               >

@@ -92,7 +92,7 @@ export const MOCK_USER = {
   company: "JS Produções",
   email: "joao.silva@eventos.com",
   phone: "(11) 99999-9999",
-  cpfCnpj: "12.345.678/0001-90",
+  cpfCnpj: "104.368.788-40",
   memberSince: "15 Jan 2024",
   initials: "JS",
 };

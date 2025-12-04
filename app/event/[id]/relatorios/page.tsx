@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import Link from "next/link";
 import {
   BarChart,
@@ -57,23 +56,16 @@ const salesByPaymentData = [
   { name: "Dinheiro", value: 10 },
 ];
 
-const COLORS = [
-  "#0e4c5c",
-  "#166e82",
-  "#e3974f",
-  "#2c3e50",
-  "#8884d8",
-  "#82ca9d",
-];
+const COLORS = ["#0A484D", "#166e82", "#e3974f", "#2c3e50", "#987284"];
 
 export default function RelatoriosPage() {
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
       <div className="p-4 space-y-6">
         {/* Header with Back Button */}
-        <div className="space-y-2">
+        <div className="space-y-2 md:hidden">
           <Link
-            href="/event/1"
+            href="/"
             className="inline-flex items-center text-gray-600 mb-4 gap-2"
           >
             <svg
@@ -90,7 +82,7 @@ export default function RelatoriosPage() {
                 d="M10 19l-7-7m0 0l7-7m-7 7h18"
               />
             </svg>
-            <span className="text-sm font-medium">Voltar</span>
+            <span className="text-sm font-medium">Meus Eventos</span>
           </Link>
           <h1 className="text-lg font-bold text-gray-900">
             Relatórios de Vendas
@@ -118,7 +110,7 @@ export default function RelatoriosPage() {
                       boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
                     }}
                   />
-                  <Bar dataKey="vendas" fill="#0e4c5c" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="vendas" fill="#0A484D" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>

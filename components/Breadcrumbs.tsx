@@ -15,7 +15,7 @@ export default function Breadcrumbs() {
     <nav className="hidden md:flex items-center text-sm text-gray-500 mb-6">
       <Link
         href="/"
-        className="hover:text-[#0D5C63] transition-colors flex items-center"
+        className="hover:text-[#0A484D] transition-colors flex items-center"
       >
         <Home size={16} />
       </Link>
@@ -25,7 +25,7 @@ export default function Breadcrumbs() {
           {item.href && index < items.length - 1 ? (
             <Link
               href={item.href}
-              className="hover:text-[#0D5C63] transition-colors font-medium"
+              className="hover:text-[#0A484D] transition-colors font-medium"
             >
               {item.label}
             </Link>
