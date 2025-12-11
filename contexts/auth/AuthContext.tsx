@@ -1,17 +1,24 @@
-'use client';
+"use client";
 
-import { isPublicRoute } from '@/config/routes';
-import { AuthContextType } from '@/types/auth';
-import { handleAuthError } from './authUtils';
-import { usePathname, useRouter } from 'next/navigation';
-import { createContext, ReactNode, useEffect, useCallback, useMemo } from 'react';
-import { getStoredTokens } from '@/services/storageService';
-import { authService } from '@/services/api/authService';
-import { useAuthState } from './useAuthState';
-import { useAuthActions } from './useAuthActions';
-import { ErrorService } from '@/services/errorService';
-import { listenToAuthFailure } from '@/services/api/httpService';
-import { logger } from '@/services/loggerService';
+import { isPublicRoute } from "@/config/routes";
+import { AuthContextType } from "@/types/auth";
+import { handleAuthError } from "./authUtils";
+import { usePathname, useRouter } from "next/navigation";
+import {
+  createContext,
+  ReactNode,
+  useEffect,
+  useCallback,
+  useMemo,
+  useContext,
+} from "react";
+import { getStoredTokens } from "@/services/storageService";
+import { useAuthState } from "./useAuthState";
+import { useAuthActions } from "./useAuthActions";
+import { ErrorService } from "@/services/errorService";
+import { logger } from "@/services/loggerService";
+import { authService } from "@/server/authService";
+import { listenToAuthFailure } from "@/server/httpService";
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
@@ -32,14 +39,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setInitializationComplete,
   } = useAuthState();
 
-  const { login, verifyTwoFactor, logout, retryAuth, refreshTokens } = useAuthActions({
-    setLoading,
-    setError,
-    setAuthenticatedState,
-    setUnauthenticatedState,
-    setTwoFactorState,
-    resetTwoFactor,
-  });
+  const { login, verifyTwoFactor, logout, retryAuth, refreshTokens } =
+    useAuthActions({
+      setLoading,
+      setError,
+      setAuthenticatedState,
+      setUnauthenticatedState,
+      setTwoFactorState,
+      resetTwoFactor,
+    });
 
   const checkAuthStatus = useCallback(async (): Promise<boolean> => {
     const tokens = getStoredTokens();
@@ -74,8 +82,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       if (shouldRedirect && !isPublicRoute(pathname)) {
         setRedirectingState();
-        sessionStorage.setItem('intendedPath', pathname);
-        router.push('/login');
+        sessionStorage.setItem("intendedPath", pathname);
+        router.push("/login");
       } else {
         setLoading(false);
       }
@@ -100,11 +108,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // Listen for auth failure events from httpService
   useEffect(() => {
     const cleanup = listenToAuthFailure(() => {
-      logger.info('Auth failure event received - logging out user');
+      logger.info("Auth failure event received - logging out user");
 
       const currentPath = window.location.pathname;
       if (!isPublicRoute(currentPath)) {
-        sessionStorage.setItem('intendedPath', currentPath);
+        sessionStorage.setItem("intendedPath", currentPath);
       }
 
       logout();
@@ -129,10 +137,30 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       refreshTokens,
       resetAuth,
     }),
-    [state, login, verifyTwoFactor, resetTwoFactor, logout, clearError, retryAuth, refreshTokens, resetAuth]
+    [
+      state,
+      login,
+      verifyTwoFactor,
+      resetTwoFactor,
+      logout,
+      clearError,
+      retryAuth,
+      refreshTokens,
+      resetAuth,
+    ]
   );
 
-  return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
+  );
 };
 
-export { AuthContext };
+export const useAuth = (): AuthContextType => {
+  const context = useContext(AuthContext);
+
+  if (!context) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+
+  return context;
+};

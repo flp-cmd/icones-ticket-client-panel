@@ -1,8 +1,13 @@
-import { logger } from '@/services/loggerService';
-import { AuthTokens } from '@/types/auth';
-import { getStoredTokens, setStoredTokens } from '@/services/storageService';
-import { twoFactorTimeService } from '@/services/twoFactorTimeService';
-import axios, { AxiosInstance, AxiosResponse, AxiosError, AxiosRequestConfig } from 'axios';
+import { logger } from "@/services/loggerService";
+import { AuthTokens } from "@/types/auth";
+import { getStoredTokens, setStoredTokens } from "@/services/storageService";
+import { twoFactorTimeService } from "@/services/twoFactorTimeService";
+import axios, {
+  AxiosInstance,
+  AxiosResponse,
+  AxiosError,
+  AxiosRequestConfig,
+} from "axios";
 
 interface RefreshTokenRequest {
   refreshToken: string;
@@ -14,11 +19,11 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 // Auth routes that should not trigger 2FA or token refresh
 const AUTH_ROUTES = [
-  '/auth/login',
-  '/auth/2fa/verify',
-  '/auth/refresh',
-  '/auth/2fa/setup/confirm',
-  '/auth/2fa/verify-code',
+  "/auth/login",
+  "/auth/2fa/verify",
+  "/auth/refresh",
+  "/auth/2fa/setup/confirm",
+  "/auth/2fa/verify-code",
 ];
 
 interface FailedQueueItem {
@@ -39,19 +44,19 @@ export interface HttpError {
 }
 
 // Custom event for auth failure
-const AUTH_FAILURE_EVENT = 'auth:refresh-failed';
-const PERMISSION_DENIED_EVENT = 'auth:permission-denied';
-export const TWO_FACTOR_REQUIRED_EVENT = 'auth:two-factor-required';
-export const TWO_FACTOR_SUCCESS_EVENT = 'auth:two-factor-success';
+const AUTH_FAILURE_EVENT = "auth:refresh-failed";
+const PERMISSION_DENIED_EVENT = "auth:permission-denied";
+export const TWO_FACTOR_REQUIRED_EVENT = "auth:two-factor-required";
+export const TWO_FACTOR_SUCCESS_EVENT = "auth:two-factor-success";
 
 export const dispatchAuthFailure = () => {
-  if (typeof window !== 'undefined') {
+  if (typeof window !== "undefined") {
     window.dispatchEvent(new CustomEvent(AUTH_FAILURE_EVENT));
   }
 };
 
 export const dispatchPermissionDenied = () => {
-  if (typeof window !== 'undefined') {
+  if (typeof window !== "undefined") {
     window.dispatchEvent(new CustomEvent(PERMISSION_DENIED_EVENT));
   }
 };
@@ -59,7 +64,7 @@ export const dispatchPermissionDenied = () => {
 let twoFactorPromise: Promise<void> | null = null;
 
 export const dispatchTwoFactorRequired = () => {
-  if (typeof window !== 'undefined') {
+  if (typeof window !== "undefined") {
     // Create a promise that resolves when 2FA is verified
     twoFactorPromise = new Promise((resolve) => {
       window.addEventListener(
@@ -77,7 +82,7 @@ export const dispatchTwoFactorRequired = () => {
 };
 
 export const listenToAuthFailure = (callback: () => void) => {
-  if (typeof window !== 'undefined') {
+  if (typeof window !== "undefined") {
     window.addEventListener(AUTH_FAILURE_EVENT, callback);
     return () => window.removeEventListener(AUTH_FAILURE_EVENT, callback);
   }
@@ -85,7 +90,7 @@ export const listenToAuthFailure = (callback: () => void) => {
 };
 
 export const listenToPermissionDenied = (callback: () => void) => {
-  if (typeof window !== 'undefined') {
+  if (typeof window !== "undefined") {
     window.addEventListener(PERMISSION_DENIED_EVENT, callback);
     return () => window.removeEventListener(PERMISSION_DENIED_EVENT, callback);
   }
@@ -101,8 +106,8 @@ class HttpService {
     this.axiosInstance = axios.create({
       baseURL: API_BASE_URL,
       headers: {
-        'Content-Type': 'application/json',
-        'x-origin': 'site-panel-admin',
+        "Content-Type": "application/json",
+        "x-origin": "site-panel-client",
       },
     });
 
@@ -119,10 +124,14 @@ class HttpService {
         }
 
         const method = config.method?.toUpperCase();
-        const url = config.url || '';
+        const url = config.url || "";
         const isAuthRoute = AUTH_ROUTES.some((route) => url.includes(route));
 
-        if (!isAuthRoute && method && twoFactorTimeService.isTwoFactorRequired(method)) {
+        if (
+          !isAuthRoute &&
+          method &&
+          twoFactorTimeService.isTwoFactorRequired(method)
+        ) {
           dispatchTwoFactorRequired();
           logger.info(`2FA required for ${method} request to ${config.url}`);
 
@@ -142,7 +151,11 @@ class HttpService {
     // Response interceptor to refresh token
     this.axiosInstance.interceptors.response.use(
       (response: AxiosResponse) => {
-        logger.http('Request successful:', response.config.url, response.status);
+        logger.http(
+          "Request successful:",
+          response.config.url,
+          response.status
+        );
         return response;
       },
       async (error: AxiosError) => {
@@ -150,7 +163,9 @@ class HttpService {
 
         // Consolidate error logs in a single elegant message
         logger.error(
-          `HTTP Error: ${error.response?.status || 'N/A'} ${originalRequest.url || ''} - ${error.message}`,
+          `HTTP Error: ${error.response?.status || "N/A"} ${
+            originalRequest.url || ""
+          } - ${error.message}`,
           error.response?.data
         );
 
@@ -158,17 +173,21 @@ class HttpService {
           ? AUTH_ROUTES.some((route) => originalRequest.url!.includes(route))
           : false;
 
-        if (error.response?.status === 401 && !originalRequest._retry && !isAuthRoute) {
-          logger.info('401 detected - Starting refresh...');
+        if (
+          error.response?.status === 401 &&
+          !originalRequest._retry &&
+          !isAuthRoute
+        ) {
+          logger.info("401 detected - Starting refresh...");
 
           if (this.isRefreshing) {
-            logger.debug('Refresh already in progress - Adding to queue');
+            logger.debug("Refresh already in progress - Adding to queue");
             // If already refreshing, add to queue
             return new Promise<string>((resolve, reject) => {
               this.failedQueue.push({ resolve, reject });
             })
               .then(() => {
-                logger.debug('Queued request executed');
+                logger.debug("Queued request executed");
                 return this.axiosInstance(originalRequest);
               })
               .catch((err) => {
@@ -178,17 +197,17 @@ class HttpService {
 
           originalRequest._retry = true;
           this.isRefreshing = true;
-          logger.info('Starting token refresh...');
+          logger.info("Starting token refresh...");
 
           try {
             const tokens = getStoredTokens();
             if (!tokens?.refreshToken) {
-              throw new Error('No refresh token available');
+              throw new Error("No refresh token available");
             }
 
-            logger.debug('Calling refresh token...');
+            logger.debug("Calling refresh token...");
             const newTokens = await this.refreshToken(tokens.refreshToken);
-            logger.info('Refresh token obtained successfully');
+            logger.info("Refresh token obtained successfully");
             setStoredTokens(newTokens);
 
             // Process the queue of pending requests
@@ -198,10 +217,10 @@ class HttpService {
             if (originalRequest.headers) {
               originalRequest.headers.Authorization = `Bearer ${newTokens.accessToken}`;
             }
-            logger.debug('Retrying original request...');
+            logger.debug("Retrying original request...");
             return this.axiosInstance(originalRequest);
           } catch (refreshError) {
-            logger.error('Refresh token error:', refreshError);
+            logger.error("Refresh token error:", refreshError);
             this.processQueue(refreshError, null);
             setStoredTokens(null);
             // Dispatch auth failure event to trigger logout
@@ -279,7 +298,10 @@ class HttpService {
   // Method to refresh token
   async refreshToken(refreshToken: string): Promise<AuthTokens> {
     const request: RefreshTokenRequest = { refreshToken };
-    const response = await this.publicPost<RefreshTokenResponse>('/auth/refresh', request);
+    const response = await this.publicPost<RefreshTokenResponse>(
+      "/auth/refresh",
+      request
+    );
     return response;
   }
 }

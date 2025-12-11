@@ -1,6 +1,13 @@
+"use client";
+
+import { useRouter } from "next/navigation";
 import { MOCK_USER } from "../data/mocks";
+import { useAuth } from "@/contexts/auth/AuthContext";
 
 export default function ProfilePage() {
+  const router = useRouter();
+  const { requiresTwoFactor } = useAuth();
+
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
       <div className="p-4 space-y-6">
@@ -80,15 +87,41 @@ export default function ProfilePage() {
                 <p className="text-sm text-gray-800">{MOCK_USER.cpfCnpj}</p>
               </div>
             </div>
+
+            <div className="flex gap-3">
+              <div className="mt-0.5 text-gray-400">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="1.5"
+                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                  />
+                </svg>
+              </div>
+              <div>
+                <p className="text-xs text-gray-400">2FA</p>
+                <p className="text-sm text-gray-800">
+                  {requiresTwoFactor ? "Ativado" : "Desativado"}
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Actions */}
         <div className="space-y-3">
-          <button className="w-full bg-white border border-gray-200 rounded-xl py-3 text-sm font-medium text-gray-700 shadow-sm active:bg-gray-50">
-            Editar Perfil
-          </button>
-          <button className="w-full bg-white border border-gray-200 rounded-xl py-3 text-sm font-medium text-gray-700 shadow-sm active:bg-gray-50">
+          <button
+            className="w-full bg-white border border-gray-200 rounded-xl py-3 text-sm font-medium text-gray-700 shadow-sm active:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:bg-white"
+            onClick={() => router.push("/perfil/2fa-setup")}
+            disabled={requiresTwoFactor}
+          >
             Autenticação em duas etapas
           </button>
           <button className="w-full bg-white border border-red-100 rounded-xl py-3 text-sm font-medium text-red-600 shadow-sm active:bg-red-50 flex items-center justify-center gap-2">

@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-const IS_PRODUCTION = process.env.NODE_ENV === 'production';
+const IS_PRODUCTION = process.env.NODE_ENV === "production";
 
 interface Logger {
   debug: (message: string, ...args: unknown[]) => void;
@@ -32,9 +32,7 @@ class LoggerService implements Logger {
   }
 
   error(message: string, ...args: unknown[]): void {
-    if (IS_PRODUCTION) {
-      console.error(`❌ [ERROR] ${message}`, ...args);
-    } else {
+    if (this.shouldLog()) {
       console.error(`❌ [ERROR] ${message}`, ...args);
     }
   }

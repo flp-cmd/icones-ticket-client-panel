@@ -1,8 +1,8 @@
 'use client';
 
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import { listenToPermissionDenied } from '@/services/api/httpService';
 import { ErrorService } from '@/services/errorService';
+import { listenToPermissionDenied } from '@/server/httpService';
 
 export interface AppError {
   message: string;

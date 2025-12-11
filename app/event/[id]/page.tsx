@@ -1,3 +1,4 @@
+import { BadgeInfo } from "lucide-react";
 import { MOCK_EVENTS } from "../../data/mocks";
 import Link from "next/link";
 
@@ -26,36 +27,67 @@ export default async function EventPage({ params }: Props) {
   const ACCENT_COLOR = COLORS[2];
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
-      <div className="p-4 space-y-6">
-        {/* Header with Back Button */}
-        <div className="space-y-2 md:hidden">
-          <Link
-            href="/"
-            className="inline-flex items-center text-gray-600 mb-4 gap-2"
+    <div className="space-y-6">
+      {/* Header with Back Button */}
+      <div className="space-y-2 md:hidden">
+        <Link
+          href="/"
+          className="inline-flex items-center text-gray-600 mb-4 gap-2"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5 mr-1"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5 mr-1"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M10 19l-7-7m0 0l7-7m-7 7h18"
-              />
-            </svg>
-            <span className="text-sm font-medium">Meus Eventos</span>
-          </Link>
-          <h1 className="text-lg font-bold text-gray-900">{event.title}</h1>
-          <p className="text-sm text-gray-500">
-            {event.date} • {event.location}
-          </p>
-        </div>
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M10 19l-7-7m0 0l7-7m-7 7h18"
+            />
+          </svg>
+          <span className="text-sm font-medium">Meus Eventos</span>
+        </Link>
+        <h1 className="text-lg font-bold text-gray-900">{event.title}</h1>
+        <p className="text-sm text-gray-500">
+          {event.date} • {event.location}
+        </p>
+      </div>
 
+      <div className="grid gap-4 md:gap-6 md:grid-cols-2 lg:grid-cols-4">
+        {/* Faturamento Total */}
+        <div className="bg-white rounded-2xl p-4 shadow-lg">
+          <div className="flex items-center gap-2 mb-2 opacity-90">
+            <div className="flex items-center justify-between w-full">
+              <span className="text-xs font-medium text-gray-800">
+                Vendas Ontem
+              </span>
+              <BadgeInfo color="#0A484D" size={16} />
+            </div>
+          </div>
+          <div className="text-xl font-bold text-[#0A484D]">
+            R$ 12.500,00 | 220
+          </div>
+        </div>
+        {/* Ingressos Vendidos */}
+        <div className="bg-white rounded-2xl p-4 shadow-lg">
+          <div className="flex items-center gap-2 mb-2 opacity-90">
+            <div className="flex items-center justify-between w-full">
+              <span className="text-xs font-medium text-gray-800">
+                Vendas Hoje
+              </span>
+              <BadgeInfo color="#0A484D" size={16} />
+            </div>
+          </div>
+          <div className="text-xl font-bold text-[#0A484D]">
+            R$ 8.300,00 | 145
+          </div>
+        </div>
+      </div>
+
+      <div className="grid gap-4 md:gap-6 md:grid-cols-2">
         {/* Revenue Goal Card */}
         <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
           <div className="flex justify-between items-start mb-4">
@@ -150,7 +182,7 @@ export default async function EventPage({ params }: Props) {
             </div>
 
             {/* Right side - Donut Chart */}
-            <div className="relative w-32 h-32 shrink-0">
+            <div className="relative w-32 h-32 justify-self-center md:justify-self-end">
               <svg viewBox="0 0 100 100" className="transform -rotate-90">
                 {/* Background circle */}
                 <circle
@@ -198,9 +230,11 @@ export default async function EventPage({ params }: Props) {
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Vendas por Setor */}
-        {event.sectors.length > 0 && (
+      {event.sectors.length > 0 && (
+        <div className="grid gap-4 lg:gap-6 lg:grid-cols-2">
+          {/* Vendas por Setor */}
           <div className="space-y-2">
             <h2 className="text-sm font-medium text-gray-800">
               Vendas por Setor
@@ -238,10 +272,8 @@ export default async function EventPage({ params }: Props) {
               ))}
             </div>
           </div>
-        )}
 
-        {/* Validação por Setor */}
-        {event.sectors.length > 0 && (
+          {/* Validação por Setor */}
           <div className="space-y-2">
             <h2 className="text-sm font-medium text-gray-800">
               Validação por Setor
@@ -275,8 +307,8 @@ export default async function EventPage({ params }: Props) {
               })}
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

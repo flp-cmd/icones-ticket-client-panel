@@ -1,17 +1,17 @@
-'use client';
+"use client";
 
-import { useCallback } from 'react';
-import { useRouter } from 'next/navigation';
-import { LoginCredentials, AuthUser } from '@/types/auth';
-import { isLoginTwoFactorResponse } from './authUtils';
+import { useCallback } from "react";
+import { useRouter } from "next/navigation";
+import { LoginCredentials, AuthUser } from "@/types/auth";
+import { isLoginTwoFactorResponse } from "./authUtils";
 import {
   setStoredTokens,
   setTwoFactorTimestamp,
   clearAllAuthData,
   clearTwoFactorTimestamp,
-} from '@/services/storageService';
-import { authService } from '@/services/api/authService';
-import { ErrorService } from '@/services/errorService';
+} from "@/services/storageService";
+import { ErrorService } from "@/services/errorService";
+import { authService } from "@/server/authService";
 
 interface UseAuthActionsProps {
   setLoading: (loading: boolean) => void;
@@ -55,13 +55,13 @@ export const useAuthActions = ({
         const user = await authService.getCurrentUser();
         setAuthenticatedState(user);
 
-        const intendedPath = sessionStorage.getItem('intendedPath') || '/';
-        sessionStorage.removeItem('intendedPath');
+        const intendedPath = sessionStorage.getItem("intendedPath") || "/";
+        sessionStorage.removeItem("intendedPath");
         router.push(intendedPath);
         setLoading(false);
       } catch (error: unknown) {
         const errorMessage = ErrorService.handleAuthError(error);
-        ErrorService.logError(error, 'useAuthActions.login');
+        // ErrorService.logError(error, "useAuthActions.login");
 
         setError(errorMessage);
         setLoading(false);
@@ -77,12 +77,15 @@ export const useAuthActions = ({
 
       try {
         if (!twoFactorToken) {
-          setError('Token 2FA não encontrado. Tente fazer login novamente.');
+          setError("Token 2FA não encontrado. Tente fazer login novamente.");
           setLoading(false);
           return;
         }
 
-        const response = await authService.verifyTwoFactor(twoFactorToken, twoFactorCode);
+        const response = await authService.verifyTwoFactor(
+          twoFactorToken,
+          twoFactorCode
+        );
 
         setStoredTokens({
           accessToken: response.accessToken,
@@ -95,13 +98,13 @@ export const useAuthActions = ({
         const user = await authService.getCurrentUser();
         setAuthenticatedState(user);
 
-        const intendedPath = sessionStorage.getItem('intendedPath') || '/';
-        sessionStorage.removeItem('intendedPath');
+        const intendedPath = sessionStorage.getItem("intendedPath") || "/";
+        sessionStorage.removeItem("intendedPath");
         router.push(intendedPath);
         setLoading(false);
       } catch (error: unknown) {
         const errorMessage = ErrorService.handleTwoFactorError(error);
-        ErrorService.logError(error, 'useAuthActions.verifyTwoFactor');
+        ErrorService.logError(error, "useAuthActions.verifyTwoFactor");
 
         setError(errorMessage);
         setLoading(false);
@@ -127,7 +130,7 @@ export const useAuthActions = ({
       setLoading(false);
     } catch (error: unknown) {
       const errorMessage = ErrorService.handleAuthError(error);
-      ErrorService.logError(error, 'useAuthActions.refreshTokens');
+      ErrorService.logError(error, "useAuthActions.refreshTokens");
 
       setError(errorMessage);
       setLoading(false);
@@ -137,7 +140,7 @@ export const useAuthActions = ({
   const logout = useCallback(() => {
     clearAllAuthData();
     setUnauthenticatedState();
-    router.push('/login');
+    router.push("/login");
   }, [setUnauthenticatedState, router]);
 
   const retryAuth = useCallback(async () => {
@@ -149,8 +152,8 @@ export const useAuthActions = ({
       setAuthenticatedState(user);
     } catch (error: unknown) {
       const currentPath = window.location.pathname;
-      sessionStorage.setItem('intendedPath', currentPath);
-      router.push('/login');
+      sessionStorage.setItem("intendedPath", currentPath);
+      router.push("/login");
     }
   }, [setLoading, setError, setAuthenticatedState, router]);
 
