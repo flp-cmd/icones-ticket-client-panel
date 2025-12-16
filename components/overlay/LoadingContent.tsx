@@ -9,15 +9,13 @@ interface LoadingContentProps {
   filterColumns?: number;
 }
 
-export default function LoadingContent({
-  showTitle = true,
-  type = "cards",
-  tableRows = 5,
-  tableColumns = 4,
-  filterFields = 2,
-  filterColumns = 3,
-}: LoadingContentProps) {
-  const FilterSkeleton = () => (
+interface FilterSkeletonProps {
+  filterFields: number;
+  filterColumns: number;
+}
+
+function FilterSkeleton({ filterFields, filterColumns }: FilterSkeletonProps) {
+  return (
     <div className="mb-6 rounded-lg border border-[#e9ecef] bg-white p-6 shadow">
       <div
         className={`grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-${filterColumns}`}
@@ -35,7 +33,16 @@ export default function LoadingContent({
       </div>
     </div>
   );
+}
 
+export default function LoadingContent({
+  showTitle = true,
+  type = "cards",
+  tableRows = 5,
+  tableColumns = 4,
+  filterFields = 2,
+  filterColumns = 3,
+}: LoadingContentProps) {
   return (
     <>
       {showTitle && (
@@ -47,7 +54,10 @@ export default function LoadingContent({
 
       {type === "filter-table" ? (
         <>
-          <FilterSkeleton />
+          <FilterSkeleton
+            filterFields={filterFields}
+            filterColumns={filterColumns}
+          />
           <div className="rounded-lg border border-[#e9ecef] bg-white p-6 shadow">
             <div className="mb-4 flex items-center justify-between">
               <div className="h-6 w-48 animate-pulse rounded bg-gray-200"></div>

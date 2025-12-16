@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { Info, DollarSign, CheckCircle } from "lucide-react";
+import { Info, CheckCircle } from "lucide-react";
 
 export default function RepassePage() {
   const [amount, setAmount] = useState("");

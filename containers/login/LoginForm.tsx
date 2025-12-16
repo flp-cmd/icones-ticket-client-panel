@@ -2,8 +2,8 @@ import SubmitButton from "@/components/buttons/SubmitButton";
 import StatusMessage from "@/components/feedback/StatusMessage";
 import { useAuth } from "@/contexts/auth/AuthContext";
 import { LoginCredentials } from "@/types/auth";
-import { EyeOff, Eye, LogIn } from "lucide-react";
-import { useState, FormEvent } from "react";
+import { EyeOff, Eye } from "lucide-react";
+import { useState } from "react";
 import { FiLogIn } from "react-icons/fi";
 
 export default function LoginForm() {

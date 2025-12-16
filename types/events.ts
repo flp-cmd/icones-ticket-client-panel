@@ -1,7 +1,6 @@
-import { LocalizationAvailable } from './localization';
-import { TableFilters } from '@/contexts/TableContext';
-import { CategoryAvailable } from './categories';
-import { Producer } from './producers';
+import { LocalizationAvailable } from "./localization";
+import { TableFilters } from "@/contexts/TableContext";
+import { Producer } from "./producers";
 
 export interface EventFilterItem {
   eventId: number;
@@ -13,17 +12,13 @@ export interface EventFilterItem {
 }
 
 export enum EventStatus {
-  DRAFT = 'draft',
-  ACTIVE = 'active',
-  PAUSED = 'paused',
-  CANCELLED = 'cancelled',
-  COMPLETED = 'completed',
-  ARCHIVED = 'archived',
+  ACTIVE = "activated",
+  COMPLETED = "ended",
 }
 
 export enum EventSeatsType {
-  UNMARKED = 'unmarked',
-  SEATSIO = 'seatsio',
+  UNMARKED = "unmarked",
+  SEATSIO = "seatsio",
 }
 
 export interface Event {
@@ -44,25 +39,38 @@ export interface Event {
   onlineSalesPriority?: number;
   localization?: LocalizationAvailable;
   schedules?: EventSchedule[];
-  categories?: CategoryAvailable[];
   producer?: Producer;
   createdAt: Date;
 }
 
 export interface EventSchedule {
+  eventId: number;
+  slug: string;
+  name: string;
+  image?: string;
+  localization?: string;
+  city?: string;
   scheduleId: number;
-  isActive: boolean;
-  subtitle?: string;
   startsAt: string;
-  openingAt?: string;
-  endsAt: string;
+  isEnded: boolean;
   salesStartsAt?: string;
-  paymentOptions?: EventSchedulePaymentOptions;
-  hasContract: boolean;
-  benefitEnabled: boolean;
-  benefitPercentage: number;
-  ticketsPerUser?: number;
-  createdAt: string;
+  revenueTarget: number;
+  isPassport: boolean;
+  data: EventScheduleData;
+}
+
+export interface EventScheduleData {
+  ticketsTotal: number;
+  ticketsSold: number;
+  ticketsCortesies: number;
+  ticketsYesterday: number;
+  ticketsToday: number;
+  ordersItemsTotal: number;
+  ordersItemsYesterday: number;
+  ordersItemsToday: number;
+  ordersValueTotal: number;
+  ordersValueYesterday: number;
+  ordersValueToday: number;
 }
 
 export interface EventSchedulePaymentOptions {
@@ -92,8 +100,8 @@ export interface EventListItem {
 }
 
 export enum EventSort {
-  ASC = 'ASC',
-  DESC = 'DESC',
+  ASC = "ASC",
+  DESC = "DESC",
 }
 
 export interface EventFilters extends TableFilters {
@@ -108,7 +116,7 @@ export interface EventListParams {
   page?: number;
   perPage?: number;
   searchQuery?: string;
-  status?: EventStatus;
+  status?: EventStatus | null;
   orderBy?: string;
   sort?: EventSort;
 }

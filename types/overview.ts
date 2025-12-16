@@ -9,8 +9,6 @@ export interface OverviewStatistics {
   courtesiesToday: number;
   revenuesYesterday: number;
   revenuesToday: number;
-  feesYesterday: number;
-  feesToday: number;
   eventsPast: number;
   eventsFuture: number;
 }

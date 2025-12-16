@@ -9,7 +9,7 @@ import { useAuth } from "@/contexts/auth/AuthContext";
 
 export default function TopNav() {
   const pathname = usePathname();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -88,7 +88,9 @@ export default function TopNav() {
               className="flex items-center hover:bg-gray-50 p-2 rounded-lg transition-colors focus:outline-none"
             >
               <div className="text-right hidden lg:block mr-3">
-                <p className="text-sm font-medium text-gray-900">Joao Silva</p>
+                <p className="text-sm font-medium text-gray-900">
+                  {user?.name}
+                </p>
                 <p className="text-xs text-gray-500">Produtor</p>
               </div>
               <div className="w-10 h-10 mr-1 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center overflow-hidden">

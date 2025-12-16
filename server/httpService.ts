@@ -13,8 +13,6 @@ interface RefreshTokenRequest {
   refreshToken: string;
 }
 
-interface RefreshTokenResponse extends AuthTokens {}
-
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 // Auth routes that should not trigger 2FA or token refresh
@@ -298,7 +296,7 @@ class HttpService {
   // Method to refresh token
   async refreshToken(refreshToken: string): Promise<AuthTokens> {
     const request: RefreshTokenRequest = { refreshToken };
-    const response = await this.publicPost<RefreshTokenResponse>(
+    const response = await this.publicPost<AuthTokens>(
       "/auth/refresh",
       request
     );

@@ -29,7 +29,7 @@ export default function LoginContainer() {
         <div className="absolute inset-0">
           <Image
             src="/login_image.jpg"
-            alt="Concert Crowd"
+            alt="Concerto Imagem"
             fill
             sizes="(min-width: 1024px) 50vw, 100vw"
             className="object-cover"

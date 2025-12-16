@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 const IS_PRODUCTION = process.env.NODE_ENV === "production";
 
 interface Logger {

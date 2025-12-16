@@ -150,7 +150,7 @@ export const useAuthActions = ({
     try {
       const user = await authService.getCurrentUser();
       setAuthenticatedState(user);
-    } catch (error: unknown) {
+    } catch {
       const currentPath = window.location.pathname;
       sessionStorage.setItem("intendedPath", currentPath);
       router.push("/login");
