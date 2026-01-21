@@ -11,7 +11,7 @@ interface ScheduleCardProps {
 export default function ScheduleCard({ event }: ScheduleCardProps) {
   return (
     <Link
-      href={`/event/${event.scheduleId}`}
+      href={`/evento/${event.scheduleId}`}
       key={event.scheduleId}
       className="block group"
     >

@@ -1,30 +1,84 @@
-import { BadgeInfo } from "lucide-react";
-import { MOCK_EVENTS } from "../../data/mocks";
-import Link from "next/link";
+"use client";
 
-import { notFound } from "next/navigation";
+import { BadgeInfo, X } from "lucide-react";
+import Link from "next/link";
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
+import { scheduleService } from "@/server/scheduleService";
+import { formatCurrency } from "@/utils/currencyUtils";
+import { useMemo, useState } from "react";
+import Loading from "@/components/feedback/Loading";
 
 interface Props {
-  params: Promise<{ id: string }>;
+  scheduleId: string;
 }
 
-export default async function EventPage({ params }: Props) {
-  const { id } = await params;
-  const event = MOCK_EVENTS.find((e) => e.id === id);
+export default function EventDashboardContainer({ scheduleId }: Props) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [newRevenueTarget, setNewRevenueTarget] = useState("");
+  const queryClient = useQueryClient();
 
-  if (!event) {
-    notFound();
-  }
+  const { data, isLoading } = useQuery({
+    queryKey: ["event", scheduleId],
+    queryFn: () => scheduleService.getScheduleById(scheduleId),
+  });
 
-  const percentage = Math.round(
-    (event.metrics.revenueCurrent / event.metrics.revenueGoal) * 100
-  );
+  const updateRevenueTargetMutation = useMutation({
+    mutationFn: (revenueTarget: number) =>
+      scheduleService.updateRevenueTarget(scheduleId, revenueTarget),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["event", scheduleId] });
+      setIsModalOpen(false);
+      setNewRevenueTarget("");
+    },
+  });
+
+  const { data: validationData, isLoading: isLoadingValidation } = useQuery({
+    queryKey: ["event", scheduleId, "validation"],
+    queryFn: () => scheduleService.getScheduleValidation(scheduleId),
+  });
+
+  const { data: resumeData, isLoading: isLoadingResume } = useQuery({
+    queryKey: ["event", scheduleId, "resume"],
+    queryFn: () => scheduleService.getScheduleResume(scheduleId),
+  });
+
+  const isPageLoading = isLoading || isLoadingValidation || isLoadingResume;
+
+  const ordersTotalValue = data?.ordersTotalValue ?? 0;
+  const revenueTarget = data?.revenueTarget ?? 0;
+  const ticketsSold = data?.ticketsTotal ?? 0;
+  const ticketsCourtesies = data?.totalCourtesies ?? 0;
+  const title = data?.title ?? "";
+  const localization = data?.localization ?? "";
+  const date = data?.date ?? "";
+
+  const sectors = validationData?.sectors ?? [];
+
+  const ticketsToday = resumeData?.ticketsToday ?? 0;
+  const ticketsYesterday = resumeData?.ticketsYesterday ?? 0;
+  const ordersToday = resumeData?.ordersValueToday ?? 0;
+  const ordersYesterday = resumeData?.ordersValueYesterday ?? 0;
+
+  const percentage = useMemo(() => {
+    if (revenueTarget > 0) {
+      if (ordersTotalValue > revenueTarget) {
+        return 100;
+      } else {
+        return Math.round((ordersTotalValue / revenueTarget) * 100);
+      }
+    }
+    return 0;
+  }, [ordersTotalValue, revenueTarget]);
 
   const COLORS = ["#0A484D", "#166e82", "#e3974f", "#2c3e50", "#987284"];
 
   const PRIMARY_COLOR = COLORS[1];
   const SECONDARY_COLOR = COLORS[2];
   const ACCENT_COLOR = COLORS[2];
+
+  if (isPageLoading) {
+    return <Loading />;
+  }
 
   return (
     <div className="space-y-6">
@@ -50,9 +104,9 @@ export default async function EventPage({ params }: Props) {
           </svg>
           <span className="text-sm font-medium">Meus Eventos</span>
         </Link>
-        <h1 className="text-lg font-bold text-gray-900">{event.title}</h1>
+        <h1 className="text-lg font-bold text-gray-900">{title}</h1>
         <p className="text-sm text-gray-500">
-          {event.date} • {event.location}
+          {date} • {localization}
         </p>
       </div>
 
@@ -68,7 +122,7 @@ export default async function EventPage({ params }: Props) {
             </div>
           </div>
           <div className="text-xl font-bold text-[#0A484D]">
-            R$ 12.500,00 | 220
+            {formatCurrency(ordersYesterday)} | {ticketsYesterday}
           </div>
         </div>
         {/* Ingressos Vendidos */}
@@ -82,7 +136,7 @@ export default async function EventPage({ params }: Props) {
             </div>
           </div>
           <div className="text-xl font-bold text-[#0A484D]">
-            R$ 8.300,00 | 145
+            {formatCurrency(ordersToday)} | {ticketsToday}
           </div>
         </div>
       </div>
@@ -112,21 +166,21 @@ export default async function EventPage({ params }: Props) {
                 Meta de Faturamento
               </span>
             </div>
-            <button className="px-3 py-1 text-xs font-medium text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-50">
+            <button
+              onClick={() => {
+                setNewRevenueTarget(revenueTarget.toString());
+                setIsModalOpen(true);
+              }}
+              className="px-3 py-1 text-xs font-medium text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-50"
+            >
               Alterar
             </button>
           </div>
 
           <div className="flex justify-between text-xs text-gray-500 mb-2">
             <span>
-              R${" "}
-              {event.metrics.revenueCurrent.toLocaleString("pt-BR", {
-                minimumFractionDigits: 2,
-              })}{" "}
-              / R${" "}
-              {event.metrics.revenueGoal.toLocaleString("pt-BR", {
-                minimumFractionDigits: 2,
-              })}
+              {formatCurrency(ordersTotalValue)} /{" "}
+              {formatCurrency(revenueTarget)}
             </span>
             <span className="font-bold" style={{ color: PRIMARY_COLOR }}>
               {percentage}%
@@ -152,7 +206,7 @@ export default async function EventPage({ params }: Props) {
             {/* Left side - Total and Legend */}
             <div className="flex-1">
               <div className="text-3xl font-bold text-gray-900 mb-4">
-                {event.ticketsSold.toLocaleString("pt-BR")}
+                {ticketsSold.toLocaleString("pt-BR")}
               </div>
 
               <div className="space-y-2">
@@ -163,9 +217,7 @@ export default async function EventPage({ params }: Props) {
                   ></div>
                   <span className="text-sm text-gray-600">Pagantes</span>
                   <span className="text-sm font-semibold text-gray-900 ml-auto mr-8">
-                    {(
-                      event.ticketsSold - event.metrics.cortesias
-                    ).toLocaleString("pt-BR")}
+                    {(ticketsSold - ticketsCourtesies).toLocaleString("pt-BR")}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -175,7 +227,7 @@ export default async function EventPage({ params }: Props) {
                   ></div>
                   <span className="text-sm text-gray-600">Cortesias</span>
                   <span className="text-sm font-semibold text-gray-900 ml-auto mr-8">
-                    {event.metrics.cortesias.toLocaleString("pt-BR")}
+                    {ticketsCourtesies.toLocaleString("pt-BR")}
                   </span>
                 </div>
               </div>
@@ -202,9 +254,7 @@ export default async function EventPage({ params }: Props) {
                   stroke={PRIMARY_COLOR}
                   strokeWidth="8"
                   strokeDasharray={`${
-                    ((event.ticketsSold - event.metrics.cortesias) /
-                      event.ticketsSold) *
-                    251.2
+                    ((ticketsSold - ticketsCourtesies) / ticketsSold) * 251.2
                   } 251.2`}
                   strokeLinecap="round"
                 />
@@ -217,12 +267,10 @@ export default async function EventPage({ params }: Props) {
                   stroke={SECONDARY_COLOR}
                   strokeWidth="8"
                   strokeDasharray={`${
-                    (event.metrics.cortesias / event.ticketsSold) * 251.2
+                    (ticketsCourtesies / ticketsSold) * 251.2
                   } 251.2`}
                   strokeDashoffset={`-${
-                    ((event.ticketsSold - event.metrics.cortesias) /
-                      event.ticketsSold) *
-                    251.2
+                    ((ticketsSold - ticketsCourtesies) / ticketsSold) * 251.2
                   }`}
                   strokeLinecap="round"
                 />
@@ -232,7 +280,7 @@ export default async function EventPage({ params }: Props) {
         </div>
       </div>
 
-      {event.sectors.length > 0 && (
+      {sectors.length > 0 && (
         <div className="grid gap-4 lg:gap-6 lg:grid-cols-2">
           {/* Vendas por Setor */}
           <div className="space-y-2">
@@ -240,19 +288,16 @@ export default async function EventPage({ params }: Props) {
               Vendas por Setor
             </h2>
             <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 space-y-4">
-              {event.sectors.map((sector) => (
+              {sectors.map((sector) => (
                 <div key={sector.name}>
                   <div className="flex justify-between items-end mb-1">
                     <span className="text-sm text-gray-800">{sector.name}</span>
                     <div className="text-right">
                       <div className="text-xs text-gray-500">
-                        {sector.sold}/{sector.total}
+                        {sector.created}/{sector.ticketsTotal}
                       </div>
                       <div className="text-xs text-gray-400">
-                        R${" "}
-                        {sector.revenue.toLocaleString("pt-BR", {
-                          minimumFractionDigits: 2,
-                        })}
+                        {formatCurrency(sector.revenue)}
                       </div>
                     </div>
                   </div>
@@ -261,7 +306,7 @@ export default async function EventPage({ params }: Props) {
                       className="h-1.5 rounded-full"
                       style={{
                         width: `${Math.min(
-                          (sector.sold / sector.total) * 100,
+                          (sector.validated / sector.created) * 100,
                           100
                         )}%`,
                         backgroundColor: ACCENT_COLOR,
@@ -279,9 +324,9 @@ export default async function EventPage({ params }: Props) {
               Validação por Setor
             </h2>
             <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 space-y-4">
-              {event.sectors.map((sector) => {
+              {sectors.map((sector) => {
                 const percentage = Math.round(
-                  (sector.validated / sector.sold) * 100
+                  (sector.validated / sector.created) * 100
                 );
                 return (
                   <div key={sector.name}>
@@ -290,7 +335,7 @@ export default async function EventPage({ params }: Props) {
                         {sector.name}
                       </span>
                       <div className="text-xs text-gray-500">
-                        {sector.validated}/{sector.sold} ({percentage}%)
+                        {sector.validated}/{sector.created} ({percentage}%)
                       </div>
                     </div>
                     <div className="w-full bg-gray-100 rounded-full h-1.5">
@@ -306,6 +351,64 @@ export default async function EventPage({ params }: Props) {
                 );
               })}
             </div>
+          </div>
+        </div>
+      )}
+
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md mx-4 shadow-xl">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold text-gray-900">
+                Alterar Meta de Faturamento
+              </h2>
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const value = parseInt(newRevenueTarget, 10);
+                if (!isNaN(value) && value >= 0) {
+                  updateRevenueTargetMutation.mutate(value);
+                }
+              }}
+            >
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Nova Meta
+              </label>
+              <input
+                type="text"
+                inputMode="numeric"
+                value={formatCurrency(parseInt(newRevenueTarget) || 0)}
+                onChange={(e) => {
+                  const rawValue = e.target.value.replace(/\D/g, "");
+                  setNewRevenueTarget(rawValue);
+                }}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A484D] focus:border-transparent outline-none"
+                placeholder="R$ 0,00"
+              />
+              <div className="flex gap-3 mt-6">
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={updateRevenueTargetMutation.isPending}
+                  className="flex-1 px-4 py-2 text-sm font-medium text-white bg-[#0A484D] rounded-lg hover:bg-[#0A484D]/90 disabled:opacity-50"
+                >
+                  {updateRevenueTargetMutation.isPending ? "Salvando..." : "Salvar"}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

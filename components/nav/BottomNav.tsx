@@ -8,12 +8,13 @@ export default function BottomNav() {
   const pathname = usePathname();
   const router = useRouter();
 
-  const isActive = (path: string) => {
-    if (path === "dashboard" && pathname === "/") return true;
-    if (path === "dashboard" && pathname === "/event/1") return true;
-    if (pathname.startsWith(path)) return true;
-    if (pathname.endsWith(path)) return true;
-    return false;
+  const isEventPage = pathname.startsWith("/evento/");
+  const eventId = isEventPage ? pathname.split("/")[2] : null;
+
+  const isActive = (url: string) => {
+    if (url === "/") return pathname === "/";
+    if (eventId && url === `/evento/${eventId}`) return pathname === url;
+    return pathname.startsWith(url);
   };
 
   const itemsGeral = [
@@ -31,24 +32,23 @@ export default function BottomNav() {
       id: "dashboard" as const,
       label: "Dashboard",
       icon: LayoutDashboard,
-      url: `/event/1/`,
+      url: `/evento/${eventId}`,
     },
     {
       id: "relatorios" as const,
       label: "Relatórios",
       icon: FileText,
-      url: `/event/1/relatorios`,
+      url: `/evento/${eventId}/relatorios`,
     },
     {
       id: "repasse" as const,
       label: "Repasse",
       icon: DollarSign,
-      url: `/event/1/repasse`,
+      url: `/evento/${eventId}/repasse`,
     },
   ];
 
-  const isEventPage = pathname.startsWith("/event/");
-  const items = isEventPage ? itemsEvento : itemsGeral;
+  const items = isEventPage && eventId ? itemsEvento : itemsGeral;
 
   return (
     <nav className="block md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg pb-safe z-50">
@@ -64,14 +64,14 @@ export default function BottomNav() {
                   router.push(item.url);
                 }}
                 className={`flex-1 flex flex-col items-center py-2 px-3 transition-colors ${
-                  isActive(item.id)
+                  isActive(item.url)
                     ? "text-[#0A484D]"
                     : "text-gray-500 hover:text-gray-700"
                 }`}
               >
                 <Icon
                   className={`w-6 h-6 ${
-                    isActive(item.id) ? "stroke-[2.5]" : ""
+                    isActive(item.url) ? "stroke-[2.5]" : ""
                   }`}
                 />
                 <span className="text-xs mt-1">{item.label}</span>

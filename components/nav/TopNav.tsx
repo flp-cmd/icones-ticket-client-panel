@@ -13,14 +13,15 @@ export default function TopNav() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const isEventPage = pathname.startsWith("/event/");
+  const isEventPage = pathname.startsWith("/evento/");
+  // Extract eventId from /evento/[eventId]...
+  const eventId = isEventPage ? pathname.split("/")[2] : null;
 
   const isActive = (path: string) => {
-    if (path === "dashboard" && pathname === "/") return true;
-    if (path === "dashboard" && pathname === "/event/1") return true;
-    if (pathname.startsWith(path)) return true;
-    if (pathname.endsWith(path)) return true;
-    return false;
+    if (path === "/") return pathname === "/";
+    // For Dashboard (root of event), use exact match to avoid highlighting on sub-pages
+    if (eventId && path === `/evento/${eventId}`) return pathname === path;
+    return pathname.startsWith(path);
   };
 
   useEffect(() => {
@@ -38,9 +39,9 @@ export default function TopNav() {
 
   const navItems = [
     { label: "Meus Eventos", path: "/" },
-    { label: "Dashboard", path: "/event/1" },
-    { label: "Relatórios", path: "/event/1/relatorios" },
-    { label: "Repasse", path: "/event/1/repasse" },
+    { label: "Dashboard", path: `/evento/${eventId}` },
+    { label: "Relatórios", path: `/evento/${eventId}/relatorios` },
+    { label: "Repasse", path: `/evento/${eventId}/repasse` },
   ];
 
   return (
@@ -58,7 +59,7 @@ export default function TopNav() {
               className="w-[130px] h-[50px]"
             />
           </Link>
-          {isEventPage && (
+          {isEventPage && eventId && (
             <nav className="flex items-center gap-1">
               {navItems.map((item) => {
                 const active = isActive(item.path);

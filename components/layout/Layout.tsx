@@ -1,13 +1,14 @@
 "use client";
 
+import { useIsPublicRoute } from "@/hooks/useIsPublicRoute";
 import BottomNav from "../nav/BottomNav";
 import TopNav from "../nav/TopNav";
-import { useIsPublicRoute } from "@/hooks/useIsPublicRoute";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const isPublicRoute = useIsPublicRoute();
+
   if (isPublicRoute) {
-    return <>{children}</>;
+    return <main>{children}</main>;
   }
   return (
     <div className="min-h-screen bg-gray-50">

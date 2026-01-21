@@ -3,29 +3,28 @@ import StatusMessage from "@/components/feedback/StatusMessage";
 import { useAuth } from "@/contexts/auth/AuthContext";
 import { LoginCredentials } from "@/types/auth";
 import { EyeOff, Eye } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { FiLogIn } from "react-icons/fi";
 
 export default function LoginForm() {
-  const [credentials, setCredentials] = useState<LoginCredentials>({
-    email: "",
-    password: "",
-  });
+  const emailRef = useRef<HTMLInputElement>(null);
+  const passwordRef = useRef<HTMLInputElement>(null);
   const [showPassword, setShowPassword] = useState(false);
   const { login, isLoading, isInitializing, error, clearError } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const credentials: LoginCredentials = {
+      email: emailRef.current?.value || "",
+      password: passwordRef.current?.value || "",
+    };
+
     await login(credentials);
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setCredentials((prev) => ({ ...prev, [name]: value }));
-
-    if (error) {
-      clearError();
-    }
+  const handleFocus = () => {
+    if (error) clearError();
   };
 
   return (
@@ -46,10 +45,10 @@ export default function LoginForm() {
               id="email"
               type="email"
               name="email"
-              value={credentials.email}
-              onChange={handleInputChange}
+              ref={emailRef}
               required
               placeholder="Digite aqui"
+              onFocus={handleFocus}
               className="block w-full px-4 py-3 bg-gray-50 border-none rounded-lg
                            text-gray-900 placeholder:text-gray-400
                            focus:ring-2 focus:bg-white transition-all duration-200 outline-none"
@@ -71,10 +70,10 @@ export default function LoginForm() {
               id="password"
               type={showPassword ? "text" : "password"}
               name="password"
-              value={credentials.password}
-              onChange={handleInputChange}
+              ref={passwordRef}
               required
               placeholder="Digite aqui"
+              onFocus={handleFocus}
               className="block w-full px-4 py-3 bg-gray-50 border-none rounded-lg
                            text-gray-900 placeholder:text-gray-400
                            focus:ring-2 focus:bg-white transition-all duration-200 outline-none pr-10"

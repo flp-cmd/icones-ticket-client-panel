@@ -59,6 +59,42 @@ export interface EventSchedule {
   data: EventScheduleData;
 }
 
+export interface EventScheduleStatistics {
+  ticketsTotal: number;
+  totalCourtesies: number;
+  ordersTotalValue: number;
+  revenueTarget: number;
+  title: string;
+  localization: string;
+  date: string;
+}
+
+export interface EventScheduleResume {
+  ticketsTotal: number;
+  ticketsSold: number;
+  ticketsCortesies: number;
+  ticketsYesterday: number;
+  ticketsToday: number;
+  ordersValueTotal: number;
+  ordersValueYesterday: number;
+  ordersValueToday: number;
+}
+
+export interface EventScheduleTicketsValidation {
+  created: number;
+  validated: number;
+  sectors: EventScheduleTicketsValidationSector[];
+}
+
+export interface EventScheduleTicketsValidationSector {
+  created: number;
+  validated: number;
+  key: string;
+  name: string;
+  ticketsTotal: number;
+  revenue: number;
+}
+
 export interface EventScheduleData {
   ticketsTotal: number;
   ticketsSold: number;
